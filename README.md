@@ -13,6 +13,7 @@ O objetivo do Novaq e fornecer uma base segura e organizada para uma plataforma 
 - Criptografia de senha com BCrypt.
 - Login com Spring Security.
 - Emissao de token JWT para usuarios autenticados.
+- Autenticacao de rotas privadas via filtro JWT e header `Authorization: Bearer <token>`.
 - Persistencia de usuarios com Spring Data JPA.
 - Banco H2 em memoria para desenvolvimento.
 - Dependencia do driver PostgreSQL para evolucao em ambiente persistente.
@@ -66,7 +67,7 @@ Configure as variaveis de ambiente em um arquivo `.env` na raiz do projeto:
 
 ```env
 JWT_SECRET=troque-por-um-segredo-forte
-API_SECURITY_TOKEN_EXPIRATION_HOURS=2
+JWT_EXPIRATION_HOURS=2
 ```
 
 Execute os testes:
@@ -161,7 +162,13 @@ Exemplo de resposta:
 
 A configuracao atual usa sessoes stateless, desabilita CSRF para uso como API REST e libera os endpoints de autenticacao em `/api/auth/**`. As senhas sao armazenadas com hash BCrypt e o login emite tokens JWT assinados.
 
-A validacao de token ja existe no servico de tokens, mas a integracao por filtro HTTP para autenticar requisicoes protegidas com `Authorization: Bearer <token>` e uma proxima etapa natural do projeto.
+Rotas fora de `/api/auth/**` exigem um token JWT valido no header HTTP:
+
+```http
+Authorization: Bearer jwt-gerado-pela-api
+```
+
+O filtro JWT recupera o token desse header, valida assinatura, emissor e expiracao, carrega o usuario pelo email do token e registra a autenticacao no contexto do Spring Security.
 
 ## Roadmap
 
@@ -173,9 +180,8 @@ A validacao de token ja existe no servico de tokens, mas a integracao por filtro
 - Pagamentos.
 - Painel administrativo.
 - Autorizacao por perfis de usuario.
-- Filtro JWT para proteger rotas privadas.
 - Configuracao de banco PostgreSQL para producao.
 
 ## Status do projeto
 
-Projeto em desenvolvimento ativo. A base atual cobre autenticacao e usuarios, servindo como fundacao para a construcao dos modulos comerciais da loja online.
+Projeto em desenvolvimento ativo. A base atual cobre autenticacao, usuarios e protecao JWT de rotas privadas, servindo como fundacao para a construcao dos modulos comerciais da loja online.
