@@ -3,6 +3,7 @@ package com.novaq.service;
 import com.novaq.dtos.request.ProductRequestDTO;
 import com.novaq.dtos.response.ProductResponseDTO;
 import com.novaq.dtos.response.ProductVariantResponseDTO;
+import com.novaq.mapper.ProductMapper;
 import com.novaq.model.Category;
 import com.novaq.model.Product;
 import com.novaq.model.ProductVariant;
@@ -10,10 +11,13 @@ import com.novaq.repository.CategoryRepository;
 import com.novaq.repository.ProductRepository;
 import com.novaq.repository.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +26,9 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductMapper productMapper;
 
-    public ProductResponseDTO createProduct(ProductRequestDTO request){
+    public ProductResponseDTO createProduct(ProductRequestDTO request) {
 
         Category category = categoryRepository.findById(request.categoriaId())
                 .orElseThrow(() -> new IllegalArgumentException("Esta categoria é inválida"));
@@ -35,7 +40,7 @@ public class ProductService {
         product.setCategoria(category);
         product.setVariacoes(new ArrayList<>());
 
-        for (var variacaoDto : request.variacoes()){
+        for (var variacaoDto : request.variacoes()) {
 
             var skuExistente = productVariantRepository.findBySku(variacaoDto.sku());
 
@@ -55,23 +60,17 @@ public class ProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        List<ProductVariantResponseDTO> variacoesResponse = savedProduct.getVariacoes().stream()
-                .map(v -> new ProductVariantResponseDTO(
-                        v.getId(),
-                        v.getSku(),
-                        v.getCor(),
-                        v.getQuantidadeEstoque(),
-                        v.getPreco()
-                ))
-                .toList();
+        return productMapper.toProductResponseDTO(savedProduct);
+    }
 
-        return new ProductResponseDTO(
-                savedProduct.getId(),
-                savedProduct.getNome(),
-                savedProduct.getDescricao(),
-                savedProduct.getMarca(),
-                savedProduct.getCategoria().getNome(),
-                variacoesResponse
-        );
+    public Page<ProductResponseDTO> findAll(Pageable pageable) {
+        Page<Product> pageOfProducts = productRepository.findAll(pageable);
+        return pageOfProducts.map(productMapper::toProductResponseDTO);
+    }
+
+
+    public Page<ProductResponseDTO> findByCategoria(UUID categoriaId, Pageable pageable) {
+        Page<Product> pageOfProducts = productRepository.findByCategoriaId(categoriaId, pageable);
+        return pageOfProducts.map(productMapper::toProductResponseDTO);
     }
 }
