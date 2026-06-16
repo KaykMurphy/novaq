@@ -1,0 +1,15 @@
+package com.novaq.repository;
+
+import com.novaq.model.Cart;
+import com.novaq.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface CartRepository extends JpaRepository<Cart, UUID> {
+
+    // carrinho com base em quem está logado
+    Optional<Cart> findByUser(User user);
+
+}
