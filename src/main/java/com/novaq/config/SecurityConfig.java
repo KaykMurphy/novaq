@@ -43,6 +43,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/categories").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                            .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                             .anyRequest().authenticated();
                 })
 

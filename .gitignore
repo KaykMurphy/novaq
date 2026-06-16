@@ -33,4 +33,5 @@ build/
 .vscode/
 
 .env
+.junie/
 repomix-output.xml
