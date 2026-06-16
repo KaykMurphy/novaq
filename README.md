@@ -18,6 +18,10 @@ O objetivo do Novaq e fornecer uma base segura e organizada para uma plataforma 
 - Banco H2 em memoria para desenvolvimento.
 - Dependencia do driver PostgreSQL para evolucao em ambiente persistente.
 - Tratamento global de erros da API.
+- Catalogo de produtos com paginacao e busca.
+- Gerenciamento de categorias.
+- Carrinho de compras com adicao de itens, controle de estoque e merge de variantes duplicadas.
+- Documentacao interativa da API com Swagger UI e OpenAPI 3.
 
 ## Stack utilizada
 
@@ -31,6 +35,7 @@ O objetivo do Novaq e fornecer uma base segura e organizada para uma plataforma 
 - PostgreSQL Driver
 - Lombok
 - Java JWT
+- SpringDoc OpenAPI
 - Maven Wrapper
 
 ## Estrutura do projeto
@@ -106,6 +111,20 @@ User: sa
 Password: password
 ```
 
+## Documentacao da API (Swagger)
+
+Apos iniciar a aplicacao, a documentacao interativa esta disponivel em:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+O schema OpenAPI pode ser acessado em:
+
+```text
+http://localhost:8080/v3/api-docs
+```
+
 ## Endpoints disponiveis
 
 ### Cadastro de usuario
@@ -158,9 +177,48 @@ Exemplo de resposta:
 }
 ```
 
+### Carrinho — Adicionar item
+
+```http
+POST /api/cart
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+Adiciona um produto ao carrinho do usuario autenticado. Se o mesmo produto ja existir no carrinho, a quantidade e somada. O estoque e validado antes da insercao.
+
+Exemplo de requisicao:
+
+```json
+{
+  "variantId": "uuid-da-variante",
+  "quantidade": 2
+}
+```
+
+Exemplo de resposta:
+
+```json
+{
+  "id": "uuid-do-carrinho",
+  "items": [
+    {
+      "id": "uuid-do-item",
+      "variantId": "uuid-da-variante",
+      "productName": "Camiseta Preta",
+      "color": "Preto",
+      "quantidade": 2,
+      "unitPrice": 79.90,
+      "subTotal": 159.80
+    }
+  ],
+  "totalCarrinho": 159.80
+}
+```
+
 ## Seguranca
 
-A configuracao atual usa sessoes stateless, desabilita CSRF para uso como API REST e libera os endpoints de autenticacao em `/api/auth/**`. As senhas sao armazenadas com hash BCrypt e o login emite tokens JWT assinados.
+A configuracao atual usa sessoes stateless, desabilita CSRF para uso como API REST e libera os endpoints de autenticacao em `/api/auth/**`, alem das rotas do Swagger UI (`/swagger-ui/**`, `/v3/api-docs`). As senhas sao armazenadas com hash BCrypt e o login emite tokens JWT assinados.
 
 Rotas fora de `/api/auth/**` exigem um token JWT valido no header HTTP:
 
@@ -172,9 +230,6 @@ O filtro JWT recupera o token desse header, valida assinatura, emissor e expirac
 
 ## Roadmap
 
-- Catalogo de produtos.
-- Categorias e busca de produtos.
-- Carrinho de compras.
 - Pedidos e historico de compras.
 - Controle de estoque.
 - Pagamentos.
@@ -184,4 +239,4 @@ O filtro JWT recupera o token desse header, valida assinatura, emissor e expirac
 
 ## Status do projeto
 
-Projeto em desenvolvimento ativo. A base atual cobre autenticacao, usuarios e protecao JWT de rotas privadas, servindo como fundacao para a construcao dos modulos comerciais da loja online.
+Projeto em desenvolvimento ativo. Atualmente conta com autenticacao JWT, catalogo de produtos, categorias, carrinho de compras e documentacao Swagger.
