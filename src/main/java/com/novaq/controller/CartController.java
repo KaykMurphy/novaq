@@ -9,10 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -32,7 +31,30 @@ public class CartController {
         CartResponseDTO response = cartService.addItemToCart(request, email);
 
         return ResponseEntity.ok(response);
+    }
 
+    @GetMapping
+    public ResponseEntity<CartResponseDTO> getCart(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        CartResponseDTO response = cartService.getCart(email);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<CartResponseDTO> removeItemFromCart(
+            @PathVariable UUID itemId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        String email = userDetails.getUsername();
+        CartResponseDTO response = cartService.removeItemFromCart(itemId, email);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<CartResponseDTO> clearCart(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        CartResponseDTO response = cartService.clearCart(email);
+        return ResponseEntity.ok(response);
     }
 
 }
