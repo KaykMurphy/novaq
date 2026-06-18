@@ -20,7 +20,9 @@ O objetivo do Novaq e fornecer uma base segura e organizada para uma plataforma 
 - Tratamento global de erros da API.
 - Catalogo de produtos com paginacao e busca.
 - Gerenciamento de categorias.
-- Carrinho de compras com adicao de itens, controle de estoque e merge de variantes duplicadas.
+- Carrinho de compras com adicao, consulta, remocao de itens e limpeza do carrinho.
+- Controle de estoque com baixa automatica ao finalizar pedido.
+- Pedidos com historico de compras e multiplos status (pendente, pago, cancelado).
 - Documentacao interativa da API com Swagger UI e OpenAPI 3.
 
 ## Stack utilizada
@@ -216,6 +218,63 @@ Exemplo de resposta:
 }
 ```
 
+### Carrinho — Consultar
+
+```http
+GET /api/cart
+Authorization: Bearer <token>
+```
+
+Retorna o carrinho do usuario autenticado com todos os itens, precos e subtotais.
+
+### Carrinho — Remover item
+
+```http
+DELETE /api/cart/{itemId}
+Authorization: Bearer <token>
+```
+
+Remove um item especifico do carrinho.
+
+### Carrinho — Limpar
+
+```http
+DELETE /api/cart/clear
+Authorization: Bearer <token>
+```
+
+Remove todos os itens do carrinho do usuario autenticado.
+
+### Pedido — Checkout
+
+```http
+POST /api/orders/checkout
+Authorization: Bearer <token>
+```
+
+Finaliza a compra convertendo o carrinho atual em um pedido. Valida o estoque de cada variante, da baixa no estoque, persiste o pedido com status `PENDING_PAYMENT` e limpa o carrinho.
+
+Exemplo de resposta:
+
+```json
+{
+  "id": "uuid-do-pedido",
+  "dataCriacao": "2026-06-18T12:00:00",
+  "status": "PENDING_PAYMENT",
+  "valorTotal": 159.80,
+  "itens": [
+    {
+      "id": "uuid-do-item",
+      "nomeProduto": "Camiseta Preta",
+      "sku": "CAM-PRE-001",
+      "quantidade": 2,
+      "precoComprado": 79.90,
+      "subTotal": 159.80
+    }
+  ]
+}
+```
+
 ## Seguranca
 
 A configuracao atual usa sessoes stateless, desabilita CSRF para uso como API REST e libera os endpoints de autenticacao em `/api/auth/**`, alem das rotas do Swagger UI (`/swagger-ui/**`, `/v3/api-docs`). As senhas sao armazenadas com hash BCrypt e o login emite tokens JWT assinados.
@@ -230,13 +289,11 @@ O filtro JWT recupera o token desse header, valida assinatura, emissor e expirac
 
 ## Roadmap
 
-- Pedidos e historico de compras.
-- Controle de estoque.
-- Pagamentos.
+- Pagamentos (Pix, cartao).
 - Painel administrativo.
 - Autorizacao por perfis de usuario.
 - Configuracao de banco PostgreSQL para producao.
 
 ## Status do projeto
 
-Projeto em desenvolvimento ativo. Atualmente conta com autenticacao JWT, catalogo de produtos, categorias, carrinho de compras e documentacao Swagger.
+Projeto em desenvolvimento ativo. Atualmente conta com autenticacao JWT, catalogo de produtos, categorias, carrinho de compras, pedidos e documentacao Swagger.
