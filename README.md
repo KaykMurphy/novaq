@@ -1,10 +1,10 @@
 # Novaq
 
-Novaq e uma API REST em Java com Spring Boot criada para ser a base de uma loja de vendas online. O projeto esta em fase inicial e atualmente concentra a estrutura principal de autenticacao, cadastro de usuarios e emissao de tokens JWT, preparando o backend para evoluir para funcionalidades como catalogo de produtos, carrinho, pedidos, pagamentos e administracao da loja.
+Novaq e uma API REST em Java com Spring Boot para e-commerce, oferecendo autenticacao JWT, catalogo de produtos, carrinho de compras, gerenciamento de pedidos e integracao com pagamento PIX via Mercado Pago.
 
 ## Visao geral
 
-O objetivo do Novaq e fornecer uma base segura e organizada para uma plataforma de e-commerce. Nesta etapa, a aplicacao ja possui fluxo de criacao de usuarios, login, criptografia de senha, validacoes de entrada, persistencia com JPA e tratamento centralizado de erros.
+O Novaq fornece uma base segura e organizada para uma plataforma de e-commerce completa. A aplicacao possui fluxo de autenticacao, catalogo com paginacao, carrinho de compras, pedidos com controle de estoque, integracao com Mercado Pago para pagamentos PIX e documentacao interativa com Swagger.
 
 ## Funcionalidades implementadas
 
@@ -23,6 +23,7 @@ O objetivo do Novaq e fornecer uma base segura e organizada para uma plataforma 
 - Carrinho de compras com adicao, consulta, remocao de itens e limpeza do carrinho.
 - Controle de estoque com baixa automatica ao finalizar pedido.
 - Pedidos com historico de compras e multiplos status (pendente, pago, cancelado).
+- Integracao com Mercado Pago para pagamentos PIX.
 - Documentacao interativa da API com Swagger UI e OpenAPI 3.
 
 ## Stack utilizada
@@ -38,6 +39,7 @@ O objetivo do Novaq e fornecer uma base segura e organizada para uma plataforma 
 - Lombok
 - Java JWT
 - SpringDoc OpenAPI
+- Mercado Pago SDK
 - Maven Wrapper
 
 ## Estrutura do projeto
