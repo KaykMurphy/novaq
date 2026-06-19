@@ -41,8 +41,11 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.POST, "/api/categories").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/error").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/checkout/webhook").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+
                             .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                             .anyRequest().authenticated();
                 })
