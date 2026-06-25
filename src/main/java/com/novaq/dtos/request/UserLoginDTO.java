@@ -10,5 +10,5 @@ public record UserLoginDTO (
         String email,
 
         @NotBlank
-        String senha
+        String password
 ){}

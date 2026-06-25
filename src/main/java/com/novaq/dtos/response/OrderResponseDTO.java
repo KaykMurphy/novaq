@@ -10,10 +10,13 @@ import java.util.UUID;
 public record OrderResponseDTO(
 
         UUID id,
-        LocalDateTime dataCriacao,
+        LocalDateTime createdAt,
         OrderStatus status,
-        BigDecimal valorTotal,
-        List<OrderItemResponseDTO> itens
+        BigDecimal totalValue,
+        List<OrderItemResponseDTO> items,
+
+        String qrCodePix,
+        String qrCodeBase64
 
 ) {
 }

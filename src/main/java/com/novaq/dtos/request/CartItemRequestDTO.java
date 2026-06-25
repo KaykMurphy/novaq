@@ -12,7 +12,7 @@ public record CartItemRequestDTO(
 
         @NotNull
         @Min(1)
-        Integer quantidade
+        Integer quantity
 
 ) {
 }

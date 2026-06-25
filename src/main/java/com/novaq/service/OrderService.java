@@ -1,14 +1,16 @@
 package com.novaq.service;
 
-import com.novaq.dtos.response.CartResponseDTO;
+import com.novaq.dtos.request.MercadoPagoWebhookDTO;
 import com.novaq.dtos.response.OrderItemResponseDTO;
 import com.novaq.dtos.response.OrderResponseDTO;
 import com.novaq.enums.OrderStatus;
+import com.novaq.exceptions.WebhookProcessingException;
 import com.novaq.model.*;
 import com.novaq.repository.CartRepository;
 import com.novaq.repository.OrderRepository;
 import com.novaq.repository.ProductVariantRepository;
 import com.novaq.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,16 +28,17 @@ public class OrderService {
     private final ProductVariantRepository productVariantRepository;
     private final OrderRepository orderRepository;
 
-    public OrderResponseDTO checkout(String emailUsuarioLogado) {
 
-        User user = userRepository.findByEmail(emailUsuarioLogado)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    public OrderResponseDTO checkout(String loggedInUserEmail) {
+
+        User user = userRepository.findByEmail(loggedInUserEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado para este usuário"));
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found for this user"));
 
         if (cart.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Não é possível fechar o pedido: o carrinho está vazio.");
+            throw new IllegalArgumentException("Cannot checkout: cart is empty");
         }
 
         Order order = new Order();
@@ -43,45 +46,45 @@ public class OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
 
-        BigDecimal totalPedido = BigDecimal.ZERO;
+        BigDecimal orderTotal = BigDecimal.ZERO;
 
         List<OrderItem> items = new ArrayList<>();
 
-        for (CartItem itemCarrinho : cart.getItems()) {
+        for (CartItem cartItem : cart.getItems()) {
 
-            ProductVariant variante = itemCarrinho.getProductVariant();
+            ProductVariant variant = cartItem.getProductVariant();
 
-            if (variante.getQuantidadeEstoque() < itemCarrinho.getQuantidade()) {
-                throw new IllegalArgumentException("Estoque insuficiente para o produto: " + variante.getProduto().getNome());
+            if (variant.getStockQuantity() < cartItem.getQuantity()) {
+                throw new IllegalArgumentException("Insufficient stock for product: " + variant.getProduct().getName());
             }
 
-            variante.setQuantidadeEstoque(variante.getQuantidadeEstoque() - itemCarrinho.getQuantidade());
+            variant.setStockQuantity(variant.getStockQuantity() - cartItem.getQuantity());
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            orderItem.setProductVariant(variante);
-            orderItem.setQuantity(itemCarrinho.getQuantidade());
-            orderItem.setPriceAtPurchase(variante.getPreco());
+            orderItem.setProductVariant(variant);
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.setPriceAtPurchase(variant.getPrice());
 
             items.add(orderItem);
 
-            BigDecimal subTotal = variante.getPreco().multiply(new BigDecimal(itemCarrinho.getQuantidade()));
+            BigDecimal subTotal = variant.getPrice().multiply(new BigDecimal(cartItem.getQuantity()));
 
-            totalPedido = totalPedido.add(subTotal);
+            orderTotal = orderTotal.add(subTotal);
         }
 
         order.setItems(items);
-        order.setTotalAmount(totalPedido);
+        order.setTotalAmount(orderTotal);
 
         Order savedOrder = orderRepository.save(order);
 
         cart.getItems().clear();
         cartRepository.save(cart);
 
-        List<OrderItemResponseDTO> itensDTO = savedOrder.getItems().stream()
+        List<OrderItemResponseDTO> itemsDTO = savedOrder.getItems().stream()
                 .map(item -> new OrderItemResponseDTO(
                         item.getId(),
-                        item.getProductVariant().getProduto().getNome(),
+                        item.getProductVariant().getProduct().getName(),
                         item.getProductVariant().getSku(),
                         item.getQuantity(),
                         item.getPriceAtPurchase(),
@@ -93,7 +96,32 @@ public class OrderService {
                 savedOrder.getCreatedAt(),
                 savedOrder.getStatus(),
                 savedOrder.getTotalAmount(),
-                itensDTO
+                itemsDTO,
+                savedOrder.getQrCodePix(),
+                savedOrder.getQrCodeBase64()
         );
     }
+
+
+    @Transactional
+    public void processPaymentNotification(MercadoPagoWebhookDTO payload){
+
+        if (payload == null || payload.data() == null || payload.data().id() == null){
+            throw new WebhookProcessingException("Invalid or incomplete webhook payload");
+        }
+
+        String paymentId = payload.data().id();
+
+        Order order = orderRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+        if (order.getStatus() == OrderStatus.PAID){
+            return;
+        }
+
+        order.setStatus(OrderStatus.PAID);
+
+        orderRepository.save(order);
+    }
+
 }

@@ -12,15 +12,15 @@ public record ProductVariantRequestDTO(
         @NotBlank
         String sku,
 
-        String cor,
+        String color,
 
         @NotNull
         @Min(0)
-        Integer quantidadeEstoque,
+        Integer stockQuantity,
 
         @NotNull
         @DecimalMin(value = "0.01")
-        BigDecimal preco
+        BigDecimal price
 
 ) {
 }

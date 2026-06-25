@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(title = "NovaQ API", version = "v1", description = "Documentação da API da NovaQ"),
+        info = @Info(title = "NovaQ API", version = "v1", description = "NovaQ API Documentation"),
         security = @SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(

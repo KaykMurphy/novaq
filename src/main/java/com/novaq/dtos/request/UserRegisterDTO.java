@@ -12,7 +12,7 @@ import lombok.Setter;
 @PasswordMatches
 public class UserRegisterDTO {
     @NotBlank(message = "Name cannot be blank")
-    private String nome;
+    private String name;
 
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email cannot be blank")
@@ -20,9 +20,9 @@ public class UserRegisterDTO {
 
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
-    private String senha;
+    private String password;
 
     @NotBlank(message = "Confirm Password is required")
-    private String confirmSenha;
+    private String confirmPassword;
 
 }

@@ -8,9 +8,7 @@ public record CartResponseDTO(
 
         UUID id,
         List<CartItemResponseDTO> items,
-        BigDecimal totalCarrinho // A soma de todos os subtotais
+        BigDecimal cartTotal
 ) {
-
-
 
 }

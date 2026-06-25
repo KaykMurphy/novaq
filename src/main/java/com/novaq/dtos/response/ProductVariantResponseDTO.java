@@ -7,10 +7,9 @@ public record ProductVariantResponseDTO(
 
         UUID id,
         String sku,
-        String cor,
-        Integer quantidadeEstoque,
-        BigDecimal preco
-
+        String color,
+        Integer stockQuantity,
+        BigDecimal price
 
 ) {
 }

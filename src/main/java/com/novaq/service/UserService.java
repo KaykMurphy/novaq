@@ -6,11 +6,8 @@ import com.novaq.enums.UserRole;
 import com.novaq.model.User;
 import com.novaq.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -27,19 +24,19 @@ public class UserService {
             );
         }
 
-        User userCriado = new User();
-        userCriado.setEmail(register.getEmail());
-        userCriado.setNomeCompleto(register.getNome());
-        userCriado.setSenha(passwordEncoder.encode(register.getSenha()));
+        User createdUser = new User();
+        createdUser.setEmail(register.getEmail());
+        createdUser.setFullName(register.getName());
+        createdUser.setPassword(passwordEncoder.encode(register.getPassword()));
 
-        userCriado.getUserRole().add(UserRole.USER);
+        createdUser.getUserRole().add(UserRole.USER);
 
-        User userSalvo = userRepository.save(userCriado);
+        User savedUser = userRepository.save(createdUser);
 
         return new UserResponseDTO(
-                userSalvo.getId(),
-                userSalvo.getNomeCompleto(),
-                userSalvo.getEmail()
+                savedUser.getId(),
+                savedUser.getFullName(),
+                savedUser.getEmail()
         );
     }
 

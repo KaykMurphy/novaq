@@ -28,21 +28,19 @@ public class TokenService {
 
             Algorithm algorithm = Algorithm.HMAC256(secret);
 
-
             List<String> roles = user.getUserRole().stream()
                     .map(Enum::name)
                     .toList();
 
             return JWT.create()
-                    .withIssuer("novaq-api") // name of the api
-                    .withSubject(user.getEmail()) // owner token
+                    .withIssuer("novaq-api")
+                    .withSubject(user.getEmail())
                     .withClaim("roles", roles)
                     .withExpiresAt(genExpirationDate())
                     .sign(algorithm);
 
-
         } catch (JWTCreationException exception) {
-            throw new RuntimeException("Erro fatal na geração do token JWT", exception);
+            throw new RuntimeException("Fatal error generating JWT token", exception);
         }
     }
 

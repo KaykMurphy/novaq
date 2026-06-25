@@ -23,17 +23,16 @@ public class CartService {
     private final ProductVariantRepository productVariantRepository;
     private final UserRepository userRepository;
 
-    public CartResponseDTO addItemToCart(CartItemRequestDTO request, String emailUsuarioLogado){
+    public CartResponseDTO addItemToCart(CartItemRequestDTO request, String loggedInUserEmail){
 
-        User user = userRepository.findByEmail(emailUsuarioLogado)
+        User user = userRepository.findByEmail(loggedInUserEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Email not found"));
-
 
         ProductVariant productVariant = productVariantRepository.findById(request.variantId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-        if (productVariant.getQuantidadeEstoque() < request.quantidade()){
-            throw new IllegalArgumentException("Estoque insuficiente para a quantidade solicitada.");
+        if (productVariant.getStockQuantity() < request.quantity()){
+            throw new IllegalArgumentException("Insufficient stock for the requested quantity");
         }
 
         Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
@@ -48,18 +47,18 @@ public class CartService {
 
         if (existingItemOpt.isPresent()) {
             CartItem existingItem = existingItemOpt.get();
-            int novaQuantidade = existingItem.getQuantidade() + request.quantidade();
+            int newQuantity = existingItem.getQuantity() + request.quantity();
 
-            if (productVariant.getQuantidadeEstoque() < novaQuantidade) {
-                throw new IllegalArgumentException("Estoque insuficiente para a quantidade total desejada.");
+            if (productVariant.getStockQuantity() < newQuantity) {
+                throw new IllegalArgumentException("Insufficient stock for the desired total quantity");
             }
-            existingItem.setQuantidade(novaQuantidade);
+            existingItem.setQuantity(newQuantity);
     }
         else {
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
             newItem.setProductVariant(productVariant);
-            newItem.setQuantidade(request.quantidade());
+            newItem.setQuantity(request.quantity());
 
             cart.getItems().add(newItem);
         }
@@ -68,30 +67,30 @@ public class CartService {
 
         List<CartItemResponseDTO> itemsResponse = savedCart.getItems().stream()
                 .map(item -> {
-                    BigDecimal precoUnitario = item.getProductVariant().getPreco();
-                    BigDecimal subTotal = precoUnitario.multiply(new BigDecimal(item.getQuantidade()));
+                    BigDecimal unitPrice = item.getProductVariant().getPrice();
+                    BigDecimal subTotal = unitPrice.multiply(new BigDecimal(item.getQuantity()));
 
                     return new CartItemResponseDTO(
                             item.getId(),
                             item.getProductVariant().getId(),
-                            item.getProductVariant().getProduto().getNome(),
-                            item.getProductVariant().getCor(),
-                            item.getQuantidade(),
-                            precoUnitario,
+                            item.getProductVariant().getProduct().getName(),
+                            item.getProductVariant().getColor(),
+                            item.getQuantity(),
+                            unitPrice,
                             subTotal
                     );
                 }).toList();
 
-        BigDecimal totalCarrinho = itemsResponse.stream()
+        BigDecimal cartTotal = itemsResponse.stream()
                 .map(CartItemResponseDTO::subTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new CartResponseDTO(savedCart.getId(), itemsResponse, totalCarrinho);
+        return new CartResponseDTO(savedCart.getId(), itemsResponse, cartTotal);
 }
 
-    public CartResponseDTO getCart(String emailUsuarioLogado) {
-        User user = userRepository.findByEmail(emailUsuarioLogado)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    public CartResponseDTO getCart(String loggedInUserEmail) {
+        User user = userRepository.findByEmail(loggedInUserEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
             Cart newCart = new Cart();
@@ -102,29 +101,29 @@ public class CartService {
         return mapToResponseDTO(cart);
     }
 
-    public CartResponseDTO removeItemFromCart(UUID itemId, String emailUsuarioLogado) {
-        User user = userRepository.findByEmail(emailUsuarioLogado)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    public CartResponseDTO removeItemFromCart(UUID itemId, String loggedInUserEmail) {
+        User user = userRepository.findByEmail(loggedInUserEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
 
         boolean removed = cart.getItems().removeIf(item -> item.getId().equals(itemId));
 
         if (!removed) {
-            throw new IllegalArgumentException("Item não encontrado neste carrinho");
+            throw new IllegalArgumentException("Item not found in this cart");
         }
 
         Cart savedCart = cartRepository.save(cart);
         return mapToResponseDTO(savedCart);
     }
 
-    public CartResponseDTO clearCart(String emailUsuarioLogado) {
-        User user = userRepository.findByEmail(emailUsuarioLogado)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    public CartResponseDTO clearCart(String loggedInUserEmail) {
+        User user = userRepository.findByEmail(loggedInUserEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
 
         cart.getItems().clear();
 
@@ -135,24 +134,24 @@ public class CartService {
     private CartResponseDTO mapToResponseDTO(Cart cart) {
         List<CartItemResponseDTO> itemsResponse = cart.getItems().stream()
                 .map(item -> {
-                    BigDecimal precoUnitario = item.getProductVariant().getPreco();
-                    BigDecimal subTotal = precoUnitario.multiply(new BigDecimal(item.getQuantidade()));
+                    BigDecimal unitPrice = item.getProductVariant().getPrice();
+                    BigDecimal subTotal = unitPrice.multiply(new BigDecimal(item.getQuantity()));
 
                     return new CartItemResponseDTO(
                             item.getId(),
                             item.getProductVariant().getId(),
-                            item.getProductVariant().getProduto().getNome(),
-                            item.getProductVariant().getCor(),
-                            item.getQuantidade(),
-                            precoUnitario,
+                            item.getProductVariant().getProduct().getName(),
+                            item.getProductVariant().getColor(),
+                            item.getQuantity(),
+                            unitPrice,
                             subTotal
                     );
                 }).toList();
 
-        BigDecimal totalCarrinho = itemsResponse.stream()
+        BigDecimal cartTotal = itemsResponse.stream()
                 .map(CartItemResponseDTO::subTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new CartResponseDTO(cart.getId(), itemsResponse, totalCarrinho);
+        return new CartResponseDTO(cart.getId(), itemsResponse, cartTotal);
     }
 }

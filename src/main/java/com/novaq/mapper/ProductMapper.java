@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    @Mapping(source = "categoria.nome", target = "categoriaNome")
+    @Mapping(source = "category.name", target = "categoryName")
     ProductResponseDTO toProductResponseDTO(Product product);
 
     ProductVariantResponseDTO toVariantResponseDTO(ProductVariant variant);

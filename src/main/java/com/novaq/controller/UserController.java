@@ -4,7 +4,6 @@ import com.novaq.dtos.request.UserLoginDTO;
 import com.novaq.dtos.request.UserRegisterDTO;
 import com.novaq.dtos.response.TokenResponseDTO;
 import com.novaq.dtos.response.UserResponseDTO;
-import com.novaq.model.User;
 import com.novaq.service.CustomUserDetails;
 import com.novaq.service.TokenService;
 import com.novaq.service.UserService;
@@ -37,17 +36,15 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody UserLoginDTO login){
 
-        var usernamePassword = new UsernamePasswordAuthenticationToken(login.email(), login.senha());
+        var usernamePassword = new UsernamePasswordAuthenticationToken(login.email(), login.password());
 
         var auth = authenticationManager.authenticate(usernamePassword);
 
-        //retrieves authenticated user from auth object
         var customUserDetails = (CustomUserDetails) auth.getPrincipal();
 
         String token = tokenService.generateToken(customUserDetails.getUser());
 
         return ResponseEntity.ok(new TokenResponseDTO(token));
     }
-
 
 }

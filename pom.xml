@@ -10,8 +10,8 @@
 	<groupId>com.novaq</groupId>
 	<artifactId>novaq</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>novaq</name>
+	<description>REST API for e-commerce with JWT authentication, product catalog, shopping cart, orders, and PIX payment integration via Mercado Pago</description>
 	<url/>
 	<licenses>
 		<license/>

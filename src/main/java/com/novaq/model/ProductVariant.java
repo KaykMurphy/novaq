@@ -20,17 +20,17 @@ public class ProductVariant {
     private UUID id;
 
     @Column(nullable = false, unique = true)
-    private String sku; // codigo de barras
+    private String sku;
 
-    private String cor;
-
-    @Column(nullable = false)
-    private Integer quantidadeEstoque;
+    private String color;
 
     @Column(nullable = false)
-    private BigDecimal preco;
+    private Integer stockQuantity;
+
+    @Column(nullable = false)
+    private BigDecimal price;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product produto;
+    private Product product;
 }

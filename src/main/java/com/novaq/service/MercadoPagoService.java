@@ -30,7 +30,7 @@ public class MercadoPagoService {
     @PostConstruct
     public void init() {
         MercadoPagoConfig.setAccessToken(accessToken);
-        log.info("SDK do Mercado Pago inicializado com sucesso.");
+        log.info("MercadoPago SDK initialized successfully");
     }
 
     public PixResponseDTO createPixPayment(PixPaymentDTO paymentDTO) {
@@ -51,7 +51,7 @@ public class MercadoPagoService {
 
         PaymentCreateRequest createRequest = PaymentCreateRequest.builder()
                 .transactionAmount(paymentDTO.getAmount())
-                .description("Compra na NovaQ")
+                .description("Purchase at NovaQ")
                 .paymentMethodId("pix")
                 .binaryMode(true)
                 .capture(true)
@@ -64,19 +64,19 @@ public class MercadoPagoService {
         try {
             Payment payment = client.create(createRequest);
 
-            String copiaECola = payment.getPointOfInteraction().getTransactionData().getQrCode();
+            String copyPaste = payment.getPointOfInteraction().getTransactionData().getQrCode();
             String base64 = payment.getPointOfInteraction().getTransactionData().getQrCodeBase64();
 
-            log.info("PIX gerado com sucesso! ID: {}", payment.getId());
+            log.info("PIX generated successfully! ID: {}", payment.getId());
 
-            return new PixResponseDTO(payment.getId(), base64, copiaECola);
+            return new PixResponseDTO(payment.getId(), base64, copyPaste);
 
         } catch (MPApiException ex) {
-            log.error("MercadoPago Error. Status: {}, Content: {}", ex.getApiResponse().getStatusCode(), ex.getApiResponse().getContent());
-            throw new RuntimeException("Erro na API do Mercado Pago ao gerar PIX");
+            log.error("MercadoPago error. Status: {}, Content: {}", ex.getApiResponse().getStatusCode(), ex.getApiResponse().getContent());
+            throw new RuntimeException("MercadoPago API error when generating PIX");
         } catch (MPException ex) {
-            log.error("Erro interno do SDK: ", ex);
-            throw new RuntimeException("Erro interno ao gerar PIX");
+            log.error("Internal SDK error: ", ex);
+            throw new RuntimeException("Internal error when generating PIX");
         }
     }
 }

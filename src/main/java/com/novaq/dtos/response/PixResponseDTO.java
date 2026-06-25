@@ -1,8 +1,8 @@
 package com.novaq.dtos.response;
 
 public record PixResponseDTO(
-        Long idPagamento,
+        Long paymentId,
         String qrCodeBase64,
-        String qrCodeCopiaECola
+        String qrCodeCopyPaste
 ) {
 }

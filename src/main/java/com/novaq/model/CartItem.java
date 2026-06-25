@@ -21,7 +21,7 @@ public class CartItem {
 
     @Column(nullable = false)
     @Min(1)
-    private Integer quantidade;
+    private Integer quantity;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")

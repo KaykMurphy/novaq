@@ -29,7 +29,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponseDTO>> findAll(@PageableDefault(page = 0, size = 12, sort = "nome")
+    public ResponseEntity<Page<ProductResponseDTO>> findAll(@PageableDefault(page = 0, size = 12, sort = "name")
                                                                 Pageable pageable) {
         Page<ProductResponseDTO> responsePage = productService.findAll(pageable);
         return ResponseEntity.ok(responsePage);
@@ -38,12 +38,8 @@ public class ProductController {
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<Page<ProductResponseDTO>> findByCategory(@PathVariable UUID categoryId,
                                                                    @PageableDefault(page = 0, size = 12) Pageable pageable) {
-        Page<ProductResponseDTO> responsePage = productService.findByCategoria(categoryId, pageable);
+        Page<ProductResponseDTO> responsePage = productService.findByCategory(categoryId, pageable);
         return ResponseEntity.ok(responsePage);
     }
-
-
-
-
 
 }

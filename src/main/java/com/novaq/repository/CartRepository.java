@@ -9,7 +9,6 @@ import java.util.UUID;
 
 public interface CartRepository extends JpaRepository<Cart, UUID> {
 
-    // carrinho com base em quem está logado
     Optional<Cart> findByUser(User user);
 
 }

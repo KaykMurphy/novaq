@@ -20,18 +20,18 @@ public class Product {
     private UUID id;
 
     @Column(nullable = false)
-    private String nome;
+    private String name;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String descricao;
+    private String description;
 
     @Column(nullable = false)
-    private String marca;
+    private String brand;
 
     @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private Category categoria;
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL)
-    private List<ProductVariant> variacoes;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductVariant> variations;
 }

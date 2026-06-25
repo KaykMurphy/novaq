@@ -27,7 +27,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public @Nullable String getPassword() {
-        return user.getSenha();
+        return user.getPassword();
     }
 
     public String getEmail() {
@@ -36,7 +36,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getNomeCompleto();
+        return user.getFullName();
     }
 
     @Override

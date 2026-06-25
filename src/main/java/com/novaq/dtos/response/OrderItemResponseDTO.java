@@ -6,10 +6,10 @@ import java.util.UUID;
 public record OrderItemResponseDTO(
 
         UUID id,
-        String nomeProduto,
+        String productName,
         String sku,
-        Integer quantidade,
-        BigDecimal precoComprado, // do price at purchase
+        Integer quantity,
+        BigDecimal purchasePrice,
         BigDecimal subTotal
 ) {
 }

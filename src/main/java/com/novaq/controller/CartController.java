@@ -1,7 +1,6 @@
 package com.novaq.controller;
 
 import com.novaq.dtos.request.CartItemRequestDTO;
-import com.novaq.dtos.response.CartItemResponseDTO;
 import com.novaq.dtos.response.CartResponseDTO;
 import com.novaq.service.CartService;
 import jakarta.validation.Valid;
@@ -25,7 +24,6 @@ public class CartController {
                                                          @Valid CartItemRequestDTO request,
                                                          @AuthenticationPrincipal UserDetails userDetails){
 
-        //email user
         String email = userDetails.getUsername();
 
         CartResponseDTO response = cartService.addItemToCart(request, email);

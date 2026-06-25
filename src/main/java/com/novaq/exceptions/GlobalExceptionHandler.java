@@ -2,6 +2,7 @@ package com.novaq.exceptions;
 
 import com.novaq.dtos.response.StandarErrorDTO;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -22,7 +24,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 e.getMessage(),
-                request.getRequestURI() // ex. api/auth
+                request.getRequestURI()
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -48,4 +50,14 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+
+    @ExceptionHandler(WebhookProcessingException.class)
+    public ResponseEntity<Void> handleWebhookException(WebhookProcessingException e){
+        log.error("Silent error in webhook intercepted by handler: {}", e.getMessage());
+
+        return ResponseEntity.ok().build();
+    }
+
+
 }

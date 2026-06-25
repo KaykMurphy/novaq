@@ -26,7 +26,7 @@ public class User {
 
     @NotBlank
     @Column(nullable = false)
-    private String nomeCompleto;
+    private String fullName;
 
     @Email
     @NotBlank
@@ -36,7 +36,7 @@ public class User {
     @NotBlank
     @Size(min = 6)
     @Column(nullable = false)
-    private String senha;
+    private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
@@ -47,11 +47,4 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<UserRole> userRole = new HashSet<>();
 
-
-
-
-
 }
-
-
-

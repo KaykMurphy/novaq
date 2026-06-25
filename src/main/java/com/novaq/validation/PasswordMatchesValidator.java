@@ -8,7 +8,7 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
 
     @Override
     public boolean isValid(UserRegisterDTO dto, ConstraintValidatorContext context) {
-        return dto.getSenha() != null &&
-                dto.getSenha().equals(dto.getConfirmSenha());
+        return dto.getPassword() != null &&
+                dto.getPassword().equals(dto.getConfirmPassword());
     }
 }

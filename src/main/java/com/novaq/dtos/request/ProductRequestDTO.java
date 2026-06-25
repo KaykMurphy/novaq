@@ -11,20 +11,20 @@ import java.util.UUID;
 public record ProductRequestDTO (
 
         @NotBlank
-        String nome,
+        String name,
 
         @NotBlank
-        String descricao,
+        String description,
 
         @NotBlank
-        String marca,
+        String brand,
 
         @NotNull
-        UUID categoriaId,
+        UUID categoryId,
 
         @NotEmpty
         @Valid
-        List<ProductVariantRequestDTO> variacoes
+        List<ProductVariantRequestDTO> variations
 
 ){
 }

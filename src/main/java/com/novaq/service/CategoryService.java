@@ -13,22 +13,21 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public CategoryResponseDTO createCategory (CategoryRequestDTO request){
+    public CategoryResponseDTO createCategory(CategoryRequestDTO request){
 
-        if (categoryRepository.findByNome(request.nome()).isPresent()){
-            throw new IllegalArgumentException("A categoria já existe");
+        if (categoryRepository.findByName(request.name()).isPresent()){
+            throw new IllegalArgumentException("Category already exists");
         }
 
-        Category category1 = new Category();
-        category1.setNome(request.nome());
+        Category category = new Category();
+        category.setName(request.name());
 
-        Category categorySaved = categoryRepository.save(category1);
+        Category savedCategory = categoryRepository.save(category);
 
         return new CategoryResponseDTO(
-                categorySaved.getId(),
-                categorySaved.getNome()
+                savedCategory.getId(),
+                savedCategory.getName()
         );
     }
-
 
 }
