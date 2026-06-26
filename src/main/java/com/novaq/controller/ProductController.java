@@ -1,6 +1,7 @@
 package com.novaq.controller;
 
 import com.novaq.dtos.request.ProductRequestDTO;
+import com.novaq.dtos.request.ProductUpdateDTO;
 import com.novaq.dtos.response.ProductResponseDTO;
 import com.novaq.service.ProductService;
 import jakarta.validation.Valid;
@@ -28,6 +29,23 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> updateProduct(
+            @PathVariable UUID id,
+            @RequestBody @Valid ProductUpdateDTO request){
+
+        ProductResponseDTO response = productService.updateProduct(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
+        productService.deleteProduct(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<Page<ProductResponseDTO>> findAll(@PageableDefault(page = 0, size = 12, sort = "name")
                                                                 Pageable pageable) {
@@ -41,5 +59,7 @@ public class ProductController {
         Page<ProductResponseDTO> responsePage = productService.findByCategory(categoryId, pageable);
         return ResponseEntity.ok(responsePage);
     }
+
+
 
 }

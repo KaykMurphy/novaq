@@ -34,4 +34,9 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductVariant> variations;
+
+    @Column(nullable = false)
+    private boolean active = true;
+
+
 }

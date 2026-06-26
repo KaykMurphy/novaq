@@ -1,6 +1,7 @@
 package com.novaq.service;
 
 import com.novaq.dtos.request.ProductRequestDTO;
+import com.novaq.dtos.request.ProductUpdateDTO;
 import com.novaq.dtos.response.ProductResponseDTO;
 import com.novaq.mapper.ProductMapper;
 import com.novaq.model.Category;
@@ -9,6 +10,7 @@ import com.novaq.model.ProductVariant;
 import com.novaq.repository.CategoryRepository;
 import com.novaq.repository.ProductRepository;
 import com.novaq.repository.ProductVariantRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,7 @@ public class ProductService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductMapper productMapper;
 
+    @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO request) {
 
         Category category = categoryRepository.findById(request.categoryId())
@@ -61,11 +64,37 @@ public class ProductService {
         return productMapper.toProductResponseDTO(savedProduct);
     }
 
+
+    @Transactional
+    public void deleteProduct(UUID productId){
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        product.setActive(false);
+
+        productRepository.save(product);
+    }
+
+    public ProductResponseDTO updateProduct(UUID productId, ProductUpdateDTO request){
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+
+        productMapper.updateEntityFromDto(request, product);
+
+        Product product1 = productRepository.save(product);
+
+        return productMapper.toProductResponseDTO(product1);
+
+    }
+
+
+
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         Page<Product> pageOfProducts = productRepository.findAll(pageable);
         return pageOfProducts.map(productMapper::toProductResponseDTO);
     }
-
 
     public Page<ProductResponseDTO> findByCategory(UUID categoryId, Pageable pageable) {
         Page<Product> pageOfProducts = productRepository.findByCategoryId(categoryId, pageable);
