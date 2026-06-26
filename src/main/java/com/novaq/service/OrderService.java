@@ -1,10 +1,13 @@
 package com.novaq.service;
 
+import com.novaq.dtos.request.CheckoutRequestDTO;
 import com.novaq.dtos.request.MercadoPagoWebhookDTO;
 import com.novaq.dtos.response.OrderItemResponseDTO;
 import com.novaq.dtos.response.OrderResponseDTO;
+import com.novaq.dtos.response.ViaCepResponseDTO;
 import com.novaq.enums.OrderStatus;
 import com.novaq.exceptions.WebhookProcessingException;
+import com.novaq.mapper.AddressMapper;
 import com.novaq.model.*;
 import com.novaq.repository.CartRepository;
 import com.novaq.repository.OrderRepository;
@@ -27,9 +30,11 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final ProductVariantRepository productVariantRepository;
     private final OrderRepository orderRepository;
+    private final ViaCepService viaCepService;
+    private final AddressMapper addressMapper;
 
 
-    public OrderResponseDTO checkout(String loggedInUserEmail) {
+    public OrderResponseDTO checkout(String loggedInUserEmail, CheckoutRequestDTO request) {
 
         User user = userRepository.findByEmail(loggedInUserEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -45,6 +50,15 @@ public class OrderService {
         order.setUser(user);
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING_PAYMENT);
+
+
+        ViaCepResponseDTO response = viaCepService.findAddressByPostalCode(request.cep());
+
+        Address address = addressMapper.toEntity(response, request);
+        address.setOrder(order);
+
+        order.setAddress(address);
+
 
         BigDecimal orderTotal = BigDecimal.ZERO;
 
