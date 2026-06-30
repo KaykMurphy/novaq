@@ -45,7 +45,7 @@ public class ProductService {
 
             var existingSku = productVariantRepository.findBySku(variantDto.sku());
 
-            if (existingSku.isPresent()) {
+            if (existingSku.isPresent() && existingSku.get().isActive()) {
                 throw new IllegalArgumentException("SKU '" + variantDto.sku() + "' already exists in the system");
             }
 
@@ -72,6 +72,10 @@ public class ProductService {
 
         product.setActive(false);
 
+        for (ProductVariant v : product.getVariations()){
+            v.setActive(false);
+        }
+
         productRepository.save(product);
     }
 
@@ -92,7 +96,7 @@ public class ProductService {
 
 
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
-        Page<Product> pageOfProducts = productRepository.findAll(pageable);
+        Page<Product> pageOfProducts = productRepository.findAllByActiveTrue(pageable);
         return pageOfProducts.map(productMapper::toProductResponseDTO);
     }
 
