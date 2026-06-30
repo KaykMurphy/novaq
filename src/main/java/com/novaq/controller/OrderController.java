@@ -5,6 +5,9 @@ import com.novaq.dtos.response.OrderResponseDTO;
 import com.novaq.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,6 +32,17 @@ public class OrderController {
         OrderResponseDTO response = orderService.checkout(email, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+    @GetMapping
+    public ResponseEntity<Page<OrderResponseDTO>> findAll(
+            @PageableDefault(page = 0, size = 10, sort = "createdAt")
+            Pageable pageable
+    ){
+        Page<OrderResponseDTO> response = orderService.findAll(pageable);
+
+        return ResponseEntity.ok(response);
     }
 
 }

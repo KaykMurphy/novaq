@@ -44,6 +44,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/checkout/webhook").permitAll()
                             .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/orders/**").hasRole("ADMIN")
                             .requestMatchers(HttpMethod.GET, "/error").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
