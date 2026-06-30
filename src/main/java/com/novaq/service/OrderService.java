@@ -1,13 +1,18 @@
 package com.novaq.service;
 
+import com.mercadopago.MercadoPagoConfig;
 import com.novaq.dtos.request.CheckoutRequestDTO;
 import com.novaq.dtos.request.MercadoPagoWebhookDTO;
+import com.novaq.dtos.request.PixPaymentDTO;
 import com.novaq.dtos.response.OrderItemResponseDTO;
 import com.novaq.dtos.response.OrderResponseDTO;
+import com.novaq.dtos.response.PixResponseDTO;
 import com.novaq.dtos.response.ViaCepResponseDTO;
 import com.novaq.enums.OrderStatus;
 import com.novaq.exceptions.WebhookProcessingException;
 import com.novaq.mapper.AddressMapper;
+import com.novaq.mapper.OrderMapper;
+import com.novaq.mapper.ProductMapper;
 import com.novaq.model.*;
 import com.novaq.repository.CartRepository;
 import com.novaq.repository.OrderRepository;
@@ -15,6 +20,8 @@ import com.novaq.repository.ProductVariantRepository;
 import com.novaq.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,6 +39,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ViaCepService viaCepService;
     private final AddressMapper addressMapper;
+    private final MercadoPagoService mercadoPagoService;
+    private final OrderMapper orderMapper;
 
 
     public OrderResponseDTO checkout(String loggedInUserEmail, CheckoutRequestDTO request) {
@@ -92,6 +101,22 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
+        PixPaymentDTO pixPaymentDTO = new PixPaymentDTO();
+        pixPaymentDTO.setAmount(savedOrder.getTotalAmount());
+        pixPaymentDTO.setOrderId(savedOrder.getId().toString());
+        pixPaymentDTO.setEmail(user.getEmail());
+        pixPaymentDTO.setFirstName(user.getFullName());
+        pixPaymentDTO.setLastName("");
+        pixPaymentDTO.setCpf(request.cpf());
+
+        PixResponseDTO pixResponse = mercadoPagoService.createPixPayment(pixPaymentDTO);
+
+        savedOrder.setPaymentId(pixResponse.paymentId().toString());
+        savedOrder.setQrCodePix(pixResponse.qrCodeCopyPaste());
+        savedOrder.setQrCodeBase64(pixResponse.qrCodeBase64());
+
+        orderRepository.save(savedOrder);
+
         cart.getItems().clear();
         cartRepository.save(cart);
 
@@ -136,6 +161,12 @@ public class OrderService {
         order.setStatus(OrderStatus.PAID);
 
         orderRepository.save(order);
+    }
+
+    
+    public Page<OrderResponseDTO> findAll(Pageable pageable) {
+        Page<Order> pageOfOrders = orderRepository.findAll(pageable);
+        return pageOfOrders.map(orderMapper::toOrderResponseDTO);
     }
 
 }

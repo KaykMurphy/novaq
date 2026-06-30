@@ -11,7 +11,10 @@ public record CheckoutRequestDTO(
         @NotNull
         Integer numero,
 
-        String complemento
+        String complemento,
+
+        @NotBlank
+        String cpf
 
 
 ) {
