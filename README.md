@@ -25,6 +25,12 @@ O Novaq fornece uma base segura e organizada para uma plataforma de e-commerce c
 - Pedidos com historico de compras e multiplos status (pendente, pago, cancelado).
 - Integracao com Mercado Pago para pagamentos PIX.
 - Documentacao interativa da API com Swagger UI e OpenAPI 3.
+- CORS configurado para integracao com frontend.
+- Imagens de produto com suporte a galeria e ordem de exibicao.
+- Informacoes de frete por produto (frete gratis ou valor fixo).
+- Soft delete com reutilizacao de SKU para variantes inativos.
+- Inicializacao automatica de usuario admin via variaveis de ambiente.
+- Endpoint GET para listagem de categorias.
 
 ## Stack utilizada
 
@@ -40,17 +46,19 @@ O Novaq fornece uma base segura e organizada para uma plataforma de e-commerce c
 - Java JWT
 - SpringDoc OpenAPI
 - Mercado Pago SDK
+- MapStruct
 - Maven Wrapper
 
 ## Estrutura do projeto
 
 ```text
 src/main/java/com/novaq
-├── config        # Configuracoes de seguranca
+├── config        # Configuracoes de seguranca e CORS
 ├── controller    # Endpoints REST
 ├── dtos          # Objetos de entrada e saida da API
 ├── enums         # Enumeracoes do dominio
 ├── exceptions    # Tratamento global de excecoes
+├── mapper        # Mapeamento entre entidades e DTOs (MapStruct)
 ├── model         # Entidades JPA
 ├── repository    # Repositorios de acesso a dados
 ├── service       # Regras de negocio
@@ -77,6 +85,10 @@ Configure as variaveis de ambiente em um arquivo `.env` na raiz do projeto:
 ```env
 JWT_SECRET=troque-por-um-segredo-forte
 JWT_EXPIRATION_HOURS=2
+MP_ACCESS_TOKEN=seu-token-mercado-pago
+URL=https://seu-endereco-ngrok
+ADMIN_PASSWORD=sua-senha-admin
+EMAIL_ADMIN=seu-email-admin
 ```
 
 Execute os testes:
@@ -141,20 +153,10 @@ Exemplo de requisicao:
 
 ```json
 {
-  "nome": "Maria Silva",
+  "name": "Maria Silva",
   "email": "maria@email.com",
-  "senha": "123456",
-  "confirmSenha": "123456"
-}
-```
-
-Exemplo de resposta:
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000000",
-  "nome": "Maria Silva",
-  "email": "maria@email.com"
+  "password": "123456",
+  "confirmPassword": "123456"
 }
 ```
 
@@ -169,7 +171,7 @@ Exemplo de requisicao:
 ```json
 {
   "email": "maria@email.com",
-  "senha": "123456"
+  "password": "123456"
 }
 ```
 
@@ -181,6 +183,83 @@ Exemplo de resposta:
 }
 ```
 
+### Categorias
+
+```http
+GET /api/categories
+```
+
+Lista todas as categorias disponiveis. Endpoint publico.
+
+```http
+POST /api/categories
+Authorization: Bearer <token-admin>
+```
+
+Cria uma nova categoria. Exige papel ADMIN.
+
+### Produtos
+
+```http
+GET /api/products?page=0&size=12
+```
+
+Lista produtos com paginacao. Endpoint publico.
+
+```http
+GET /api/products/{id}
+```
+
+Retorna detalhes de um produto especifico. Endpoint publico.
+
+```http
+GET /api/products/category/{categoryId}?page=0&size=12
+```
+
+Lista produtos por categoria. Endpoint publico.
+
+```http
+POST /api/products
+Authorization: Bearer <token-admin>
+```
+
+Cria um novo produto. Exige papel ADMIN. Suporta imagens e informacoes de frete.
+
+Exemplo de requisicao:
+
+```json
+{
+  "name": "Camiseta Basica",
+  "description": "Camiseta 100% algodao",
+  "brand": "MarcaX",
+  "categoryId": "uuid-da-categoria",
+  "imageUrl": "https://exemplo.com/imagem.jpg",
+  "images": [
+    { "url": "https://exemplo.com/img1.jpg", "position": 0 },
+    { "url": "https://exemplo.com/img2.jpg", "position": 1 }
+  ],
+  "freeShipping": true,
+  "shippingCost": 0,
+  "variations": [
+    { "sku": "CAM-PRE-M", "color": "Preto", "stockQuantity": 50, "price": 79.90 }
+  ]
+}
+```
+
+```http
+PUT /api/products/{id}
+Authorization: Bearer <token-admin>
+```
+
+Atualiza um produto existente. Exige papel ADMIN.
+
+```http
+DELETE /api/products/{id}
+Authorization: Bearer <token-admin>
+```
+
+Desativa um produto (soft delete). Exige papel ADMIN.
+
 ### Carrinho — Adicionar item
 
 ```http
@@ -189,34 +268,12 @@ Content-Type: application/json
 Authorization: Bearer <token>
 ```
 
-Adiciona um produto ao carrinho do usuario autenticado. Se o mesmo produto ja existir no carrinho, a quantidade e somada. O estoque e validado antes da insercao.
-
 Exemplo de requisicao:
 
 ```json
 {
   "variantId": "uuid-da-variante",
-  "quantidade": 2
-}
-```
-
-Exemplo de resposta:
-
-```json
-{
-  "id": "uuid-do-carrinho",
-  "items": [
-    {
-      "id": "uuid-do-item",
-      "variantId": "uuid-da-variante",
-      "productName": "Camiseta Preta",
-      "color": "Preto",
-      "quantidade": 2,
-      "unitPrice": 79.90,
-      "subTotal": 159.80
-    }
-  ],
-  "totalCarrinho": 159.80
+  "quantity": 2
 }
 ```
 
@@ -227,16 +284,12 @@ GET /api/cart
 Authorization: Bearer <token>
 ```
 
-Retorna o carrinho do usuario autenticado com todos os itens, precos e subtotais.
-
 ### Carrinho — Remover item
 
 ```http
 DELETE /api/cart/{itemId}
 Authorization: Bearer <token>
 ```
-
-Remove um item especifico do carrinho.
 
 ### Carrinho — Limpar
 
@@ -245,8 +298,6 @@ DELETE /api/cart/clear
 Authorization: Bearer <token>
 ```
 
-Remove todos os itens do carrinho do usuario autenticado.
-
 ### Pedido — Checkout
 
 ```http
@@ -254,48 +305,70 @@ POST /api/orders/checkout
 Authorization: Bearer <token>
 ```
 
-Finaliza a compra convertendo o carrinho atual em um pedido. Valida o estoque de cada variante, da baixa no estoque, persiste o pedido com status `PENDING_PAYMENT` e limpa o carrinho.
-
-Exemplo de resposta:
+Exemplo de requisicao:
 
 ```json
 {
-  "id": "uuid-do-pedido",
-  "dataCriacao": "2026-06-18T12:00:00",
-  "status": "PENDING_PAYMENT",
-  "valorTotal": 159.80,
-  "itens": [
-    {
-      "id": "uuid-do-item",
-      "nomeProduto": "Camiseta Preta",
-      "sku": "CAM-PRE-001",
-      "quantidade": 2,
-      "precoComprado": 79.90,
-      "subTotal": 159.80
-    }
-  ]
+  "cep": "01001-000",
+  "numero": 1000,
+  "complemento": "Sala 101",
+  "cpf": "12345678901"
 }
 ```
 
-## Seguranca
-
-A configuracao atual usa sessoes stateless, desabilita CSRF para uso como API REST e libera os endpoints de autenticacao em `/api/auth/**`, alem das rotas do Swagger UI (`/swagger-ui/**`, `/v3/api-docs`). As senhas sao armazenadas com hash BCrypt e o login emite tokens JWT assinados.
-
-Rotas fora de `/api/auth/**` exigem um token JWT valido no header HTTP:
+### Pedidos — Listar (Admin)
 
 ```http
-Authorization: Bearer jwt-gerado-pela-api
+GET /api/orders?page=0&size=10
+Authorization: Bearer <token-admin>
 ```
 
-O filtro JWT recupera o token desse header, valida assinatura, emissor e expiracao, carrega o usuario pelo email do token e registra a autenticacao no contexto do Spring Security.
+Lista todos os pedidos com paginacao. Exige papel ADMIN.
+
+### Webhook MercadoPago
+
+```http
+POST /api/checkout/webhook
+```
+
+Endpoint chamado pelo MercadoPago para notificar status de pagamento. Publico.
+
+## Seguranca
+
+A configuracao atual usa sessoes stateless, desabilita CSRF para uso como API REST e configura CORS para permitir requisicoes do frontend (`localhost:3000`). As senhas sao armazenadas com hash BCrypt e o login emite tokens JWT assinados.
+
+Rotas publicas (sem autenticacao):
+
+- `POST /api/auth/**` (registro e login)
+- `GET /api/products/**` (catalogo)
+- `GET /api/categories/**` (listagem de categorias)
+- `POST /api/checkout/webhook` (notificacao MercadoPago)
+
+Rotas que exigem papel ADMIN:
+
+- `POST /api/products` (criar produto)
+- `PUT /api/products/**` (atualizar produto)
+- `DELETE /api/products/**` (desativar produto)
+- `POST /api/categories` (criar categoria)
+- `GET /api/orders/**` (listar pedidos)
+
+Outras rotas exigem token JWT valido no header HTTP:
+
+```http
+Authorization: Bearer <token>
+```
+
+## Frontend
+
+O frontend esta em desenvolvimento separado usando Next.js + TypeScript + Tailwind CSS. Consulte o repositorio do frontend para mais detalhes.
 
 ## Roadmap
 
 - Pagamentos (Pix, cartao).
-- Painel administrativo.
+- Painel administrativo completo.
 - Autorizacao por perfis de usuario.
 - Configuracao de banco PostgreSQL para producao.
 
 ## Status do projeto
 
-Projeto em desenvolvimento ativo. Atualmente conta com autenticacao JWT, catalogo de produtos, categorias, carrinho de compras, pedidos e documentacao Swagger.
+Projeto em desenvolvimento ativo. Conta com autenticacao JWT, catalogo de produtos com imagens e frete, categorias, carrinho de compras, pedidos com integracao PIX, documentacao Swagger e suporte a frontend via CORS.
