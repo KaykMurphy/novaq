@@ -7,6 +7,8 @@ import com.novaq.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
@@ -28,6 +30,12 @@ public class CategoryService {
                 savedCategory.getId(),
                 savedCategory.getName()
         );
+    }
+
+    public List<CategoryResponseDTO> findAll() {
+        return categoryRepository.findAll().stream()
+                .map(c -> new CategoryResponseDTO(c.getId(), c.getName()))
+                .toList();
     }
 
 }
