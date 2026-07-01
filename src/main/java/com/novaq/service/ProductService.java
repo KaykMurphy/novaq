@@ -6,6 +6,7 @@ import com.novaq.dtos.response.ProductResponseDTO;
 import com.novaq.mapper.ProductMapper;
 import com.novaq.model.Category;
 import com.novaq.model.Product;
+import com.novaq.model.ProductImage;
 import com.novaq.model.ProductVariant;
 import com.novaq.repository.CategoryRepository;
 import com.novaq.repository.ProductRepository;
@@ -39,7 +40,19 @@ public class ProductService {
         product.setDescription(request.description());
         product.setBrand(request.brand());
         product.setCategory(category);
+        product.setImageUrl(request.imageUrl());
         product.setVariations(new ArrayList<>());
+        product.setImages(new ArrayList<>());
+
+        if (request.images() != null) {
+            for (var imageDto : request.images()) {
+                ProductImage image = new ProductImage();
+                image.setUrl(imageDto.url());
+                image.setPosition(imageDto.position());
+                image.setProduct(product);
+                product.getImages().add(image);
+            }
+        }
 
         for (var variantDto : request.variations()) {
 
@@ -64,7 +77,6 @@ public class ProductService {
         return productMapper.toProductResponseDTO(savedProduct);
     }
 
-
     @Transactional
     public void deleteProduct(UUID productId){
         Product product = productRepository.findById(productId)
@@ -84,7 +96,6 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-
         productMapper.updateEntityFromDto(request, product);
 
         Product product1 = productRepository.save(product);
@@ -92,8 +103,6 @@ public class ProductService {
         return productMapper.toProductResponseDTO(product1);
 
     }
-
-
 
     public Page<ProductResponseDTO> findAll(Pageable pageable) {
         Page<Product> pageOfProducts = productRepository.findAllByActiveTrue(pageable);
@@ -103,5 +112,11 @@ public class ProductService {
     public Page<ProductResponseDTO> findByCategory(UUID categoryId, Pageable pageable) {
         Page<Product> pageOfProducts = productRepository.findByCategoryId(categoryId, pageable);
         return pageOfProducts.map(productMapper::toProductResponseDTO);
+    }
+
+    public ProductResponseDTO findById(UUID productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        return productMapper.toProductResponseDTO(product);
     }
 }

@@ -1,10 +1,11 @@
 package com.novaq.mapper;
 
-import com.novaq.dtos.request.ProductRequestDTO;
 import com.novaq.dtos.request.ProductUpdateDTO;
+import com.novaq.dtos.response.ProductImageResponseDTO;
 import com.novaq.dtos.response.ProductResponseDTO;
 import com.novaq.dtos.response.ProductVariantResponseDTO;
 import com.novaq.model.Product;
+import com.novaq.model.ProductImage;
 import com.novaq.model.ProductVariant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +23,7 @@ public interface ProductMapper {
 
     void updateEntityFromDto(ProductUpdateDTO request, @MappingTarget Product product);
 
+    ProductImageResponseDTO toImageResponseDTO(ProductImage image);
 
 
 
