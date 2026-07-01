@@ -7,6 +7,7 @@ import com.novaq.model.*;
 import com.novaq.repository.CartRepository;
 import com.novaq.repository.ProductVariantRepository;
 import com.novaq.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -101,6 +102,7 @@ public class CartService {
         return mapToResponseDTO(cart);
     }
 
+    @Transactional
     public CartResponseDTO removeItemFromCart(UUID itemId, String loggedInUserEmail) {
         User user = userRepository.findByEmail(loggedInUserEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -118,6 +120,7 @@ public class CartService {
         return mapToResponseDTO(savedCart);
     }
 
+    @Transactional
     public CartResponseDTO clearCart(String loggedInUserEmail) {
         User user = userRepository.findByEmail(loggedInUserEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
