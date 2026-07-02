@@ -141,6 +141,34 @@ O schema OpenAPI pode ser acessado em:
 http://localhost:8080/v3/api-docs
 ```
 
+## Swagger UI em acao
+
+Imagens dos principais endpoints testados diretamente no Swagger UI.
+
+### Autenticacao — Login
+
+![Login no Swagger](docs/images/swagger-login.png)
+
+Endpoint `POST /api/auth/login` retornando token JWT para o usuario autenticado.
+
+### Gerenciamento — Criar Categoria
+
+![Criar categoria no Swagger](docs/images/swagger-criar-categoria.png)
+
+Endpoint `POST /api/categories` criando a categoria "Eletronicos" com retorno do UUID gerado.
+
+### Catalogo — Criar Produto
+
+![Criar produto no Swagger](docs/images/swagger-criar-produto.png)
+
+Endpoint `POST /api/products` cadastrando o "Smartphone NovaQ X1" com galeria de imagens, variacoes e controle de estoque.
+
+### Catalogo — Buscar Produto por ID
+
+![Buscar produto no Swagger](docs/images/swagger-buscar-produto.png)
+
+Endpoint `GET /api/products/{id}` retornando os detalhes completos do produto, incluindo variacoes, imagens e informacoes de frete.
+
 ## Endpoints disponiveis
 
 ### Cadastro de usuario
