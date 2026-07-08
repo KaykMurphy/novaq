@@ -16,7 +16,13 @@ public record OrderResponseDTO(
         List<OrderItemResponseDTO> items,
 
         String qrCodePix,
-        String qrCodeBase64
+        String qrCodeBase64,
+
+        UUID userId,
+        String userName,
+
+
+        String paymentId
 
 ) {
 }

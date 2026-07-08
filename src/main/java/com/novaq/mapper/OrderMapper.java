@@ -9,9 +9,12 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
-    
+
     @Mapping(source = "totalAmount", target = "totalValue")
     @Mapping(source = "items", target = "items")
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "user.fullName", target = "userName")
+    @Mapping(source = "paymentId", target = "paymentId")
     OrderResponseDTO toOrderResponseDTO(Order order);
 
     @Mapping(source = "productVariant.product.name", target = "productName")

@@ -137,7 +137,10 @@ public class OrderService {
                 savedOrder.getTotalAmount(),
                 itemsDTO,
                 savedOrder.getQrCodePix(),
-                savedOrder.getQrCodeBase64()
+                savedOrder.getQrCodeBase64(),
+                savedOrder.getUser().getId(),
+                savedOrder.getUser().getFullName(),
+                savedOrder.getPaymentId()
         );
     }
 
