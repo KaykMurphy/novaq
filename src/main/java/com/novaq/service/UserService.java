@@ -36,7 +36,10 @@ public class UserService {
         return new UserResponseDTO(
                 savedUser.getId(),
                 savedUser.getFullName(),
-                savedUser.getEmail()
+                savedUser.getEmail(),
+                savedUser.getUserRole(),
+                savedUser.isActive(),
+                savedUser.getCreatedAt()
         );
     }
 
