@@ -396,6 +396,14 @@ O frontend esta em desenvolvimento separado usando Next.js + TypeScript + Tailwi
 - Painel administrativo completo.
 - Autorizacao por perfis de usuario.
 - Configuracao de banco PostgreSQL para producao.
+<!-- TODO: [DOCUMENTAÇÃO] Atualizar o README após implementar as novas funcionalidades:
+  - Adicionar seção "### Painel Administrativo" documentando os endpoints admin.
+  - Adicionar seção "### Perfis de Usuário" explicando os roles (ADMIN, USER, INFLUENCER).
+  - Atualizar a seção "## Endpoints disponíveis" com os novos endpoints.
+  - Adicionar seção "### Configuração para Produção" explicando como usar o profile prod.
+  - Atualizar "## Como executar localmente" para mencionar os profiles.
+  - Atualizar "## Seguranca" com as novas regras de acesso.
+-->
 
 ## Status do projeto
 
