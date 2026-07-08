@@ -19,8 +19,14 @@ public class WebhookController {
 
     private final OrderService orderService;
 
+
     @PostMapping("/webhook")
     public ResponseEntity<Void> handleMercadoPagoWebhook(@RequestBody MercadoPagoWebhookDTO payload){
+
+        if(payload == null || payload.data() == null || payload.data().id() == null
+            || payload.data().id().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
 
         orderService.processPaymentNotification(payload);
 

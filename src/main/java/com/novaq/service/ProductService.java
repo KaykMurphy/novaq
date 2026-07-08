@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -54,7 +56,13 @@ public class ProductService {
             }
         }
 
+        Set<String> skusVistos = new HashSet<>();
+
         for (var variantDto : request.variations()) {
+
+            if (!skusVistos.add(variantDto.sku().toUpperCase())) {
+                throw new IllegalArgumentException("SKU '" + variantDto.sku() + "' is duplicated in the request");
+            }
 
             var existingSku = productVariantRepository.findBySku(variantDto.sku());
 
@@ -114,9 +122,16 @@ public class ProductService {
         return pageOfProducts.map(productMapper::toProductResponseDTO);
     }
 
+
     public ProductResponseDTO findById(UUID productId) {
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        if (!product.isActive()) {
+            throw new IllegalArgumentException("Product not found");
+        }
+
         return productMapper.toProductResponseDTO(product);
     }
 }
