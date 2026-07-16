@@ -4,11 +4,9 @@ services:
     container_name: novaq-db
     restart: always
     environment:
-      POSTGRES_DB: novaqdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: rootpassword
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -17,14 +15,14 @@ services:
     container_name: novaq-api
     restart: always
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       - db
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      DATABASE_URL: jdbc:postgresql://db:5432/novaqdb
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: rootpassword
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: ${DB_URL}
+      DATABASE_USER: ${DB_USER}
+      DATABASE_PASSWORD: ${DB_PASS}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS}
       MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
