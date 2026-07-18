@@ -24,11 +24,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -43,6 +46,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
 
 
+    @Transactional
     public OrderResponseDTO checkout(String loggedInUserEmail, CheckoutRequestDTO request) {
 
         User user = userRepository.findByEmail(loggedInUserEmail)
@@ -109,7 +113,13 @@ public class OrderService {
         pixPaymentDTO.setLastName("");
         pixPaymentDTO.setCpf(request.cpf());
 
-        PixResponseDTO pixResponse = mercadoPagoService.createPixPayment(pixPaymentDTO);
+        PixResponseDTO pixResponse;
+        try {
+            pixResponse = mercadoPagoService.createPixPayment(pixPaymentDTO);
+        } catch (Exception e) {
+            log.error("Falha ao criar pagamento PIX para pedido {}: {}", savedOrder.getId(), e.getMessage());
+            throw new RuntimeException("Erro ao processar pagamento. Tente novamente.", e);
+        }
 
         savedOrder.setPaymentId(pixResponse.paymentId().toString());
         savedOrder.setQrCodePix(pixResponse.qrCodeCopyPaste());
