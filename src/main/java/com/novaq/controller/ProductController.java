@@ -60,9 +60,9 @@ public class ProductController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<Page<ProductResponseDTO>> findByCategory(@PathVariable UUID categoryId,
+    public ResponseEntity<Page<ProductResponseDTO>> findActiveProductsByCategory(@PathVariable UUID categoryId,
                                                                    @PageableDefault(page = 0, size = 12) Pageable pageable) {
-        Page<ProductResponseDTO> responsePage = productService.findByCategory(categoryId, pageable);
+        Page<ProductResponseDTO> responsePage = productService.findActiveProductsByCategory(categoryId, pageable);
         return ResponseEntity.ok(responsePage);
     }
 

@@ -99,6 +99,7 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @Transactional
     public ProductResponseDTO updateProduct(UUID productId, ProductUpdateDTO request){
 
         Product product = productRepository.findById(productId)
@@ -117,8 +118,8 @@ public class ProductService {
         return pageOfProducts.map(productMapper::toProductResponseDTO);
     }
 
-    public Page<ProductResponseDTO> findByCategory(UUID categoryId, Pageable pageable) {
-        Page<Product> pageOfProducts = productRepository.findByCategoryId(categoryId, pageable);
+    public Page<ProductResponseDTO> findActiveProductsByCategory(UUID categoryId, Pageable pageable) {
+        Page<Product> pageOfProducts = productRepository.findByCategoryIdAndActiveTrue(categoryId, pageable);
         return pageOfProducts.map(productMapper::toProductResponseDTO);
     }
 

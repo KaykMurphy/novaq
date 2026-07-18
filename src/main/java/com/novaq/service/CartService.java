@@ -24,6 +24,7 @@ public class CartService {
     private final ProductVariantRepository productVariantRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public CartResponseDTO addItemToCart(CartItemRequestDTO request, String loggedInUserEmail){
 
         User user = userRepository.findByEmail(loggedInUserEmail)
