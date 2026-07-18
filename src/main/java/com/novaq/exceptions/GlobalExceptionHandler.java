@@ -26,12 +26,12 @@ public class GlobalExceptionHandler {
 
         StandarErrorDTO errorResponse = new StandarErrorDTO(
                 LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.FORBIDDEN.value(),
                 "Access denied.",
                 request.getRequestURI()
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     @ExceptionHandler(DisabledException.class)
