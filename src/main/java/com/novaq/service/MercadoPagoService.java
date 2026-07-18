@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -64,19 +66,28 @@ public class MercadoPagoService {
         try {
             Payment payment = client.create(createRequest);
 
-            String copyPaste = payment.getPointOfInteraction().getTransactionData().getQrCode();
-            String base64 = payment.getPointOfInteraction().getTransactionData().getQrCodeBase64();
+            String copyPaste = Optional.ofNullable(payment.getPointOfInteraction())
+                    .map(poi -> poi.getTransactionData())
+                    .map(data -> data.getQrCode())
+                    .orElseThrow(() -> new RuntimeException("Código Copia e Cola ausente na resposta do Mercado Pago"));
+
+            String base64 = Optional.ofNullable(payment.getPointOfInteraction())
+                    .map(poi -> poi.getTransactionData())
+                    .map(data -> data.getQrCodeBase64())
+                    .orElseThrow(() -> new RuntimeException("QR Code Base64 ausente na resposta do Mercado Pago"));
 
             log.info("PIX generated successfully! ID: {}", payment.getId());
 
             return new PixResponseDTO(payment.getId(), base64, copyPaste);
 
+
         } catch (MPApiException ex) {
             log.error("MercadoPago error. Status: {}, Content: {}", ex.getApiResponse().getStatusCode(), ex.getApiResponse().getContent());
-            throw new RuntimeException("MercadoPago API error when generating PIX");
+            throw new RuntimeException("MercadoPago API error when generating PIX", ex);
+
         } catch (MPException ex) {
             log.error("Internal SDK error: ", ex);
-            throw new RuntimeException("Internal error when generating PIX");
+            throw new RuntimeException("Internal error when generating PIX", ex);
         }
     }
 }
