@@ -6,11 +6,13 @@ import com.novaq.enums.UserRole;
 import com.novaq.model.User;
 import com.novaq.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -19,9 +21,8 @@ public class UserService {
     public UserResponseDTO register(UserRegisterDTO register) {
 
         if (userRepository.findByEmail(register.getEmail()).isPresent()) {
-            throw new IllegalArgumentException(
-                    String.format("User with the email address '%s' already exists.", register.getEmail())
-            );
+            log.warn("Registration attempt failed", register.getEmail());
+            throw new IllegalArgumentException("Registration failed. Please try again.");
         }
 
         User createdUser = new User();
